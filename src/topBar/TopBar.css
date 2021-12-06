@@ -1,0 +1,30 @@
+.buttons-container {
+    margin: 1%;
+    display: flex;
+    justify-content: center;
+}
+
+.buttons-container > * {
+    margin-left: 5px;
+}
+
+.input-with-label > * {
+    margin-right: 5px;
+}
+
+.input-field {
+    width: 50px;
+}
+
+.divider {
+    border-left: 6px solid black;
+    height: inherit;
+    left: 50%;
+    top: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.algorithm-dropdown {
+    height: inherit;
+}
