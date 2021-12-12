@@ -1,39 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { getBubbleSortAnimations, getMergeSortAnimations } from "./sortingAlgorithms";
 import "./SortingVisualizer.css";
 
-// TODO: move to algorithms file
-function merge(arr) {
-    if (arr.length <= 1) return arr;
-    let mid = Math.floor(arr.length / 2);
-    let left = merge(arr.slice(0, mid));
-    let right = merge(arr.slice(mid));
-    function mergeSort(arr1, arr2) {
-        let result = [];
-        let i = 0;
-        let j = 0;
-        while (i < arr1.length && j < arr2.length) {
-            if (arr1[i] < arr2[j]) {
-                result.push(arr1[i]);
-                i++;
-            } else {
-                result.push(arr2[j]);
-                j++;
-            }
-        }
-        while (i < arr1.length) {
-            result.push(arr1[i]);
-            i++;
-        }
-        while (j < arr2.length) {
-            result.push(arr2[j]);
-            j++;
-        }
-        return result;
-    }
-    return mergeSort(left, right);
-}
+const PRIMARY_COLOR = "lightblue";
+const SECONDAY_COLOR = "red";
+const SPEED = 5;
 
-const SortingVisualizer = ({ length, min, max, reset, setReset, sorting, setSorting }) => {
+// push intervals and clear while component unmount or stop click
+const intervalIds = [];
+
+const SortingVisualizer = ({ length, min, max, reset, setReset, sorting, setSorting, algorithm }) => {
     const [array, setArray] = useState([]);
 
     const generateRandomArray = useCallback(
@@ -45,17 +21,80 @@ const SortingVisualizer = ({ length, min, max, reset, setReset, sorting, setSort
         [setReset]
     );
 
+    const mergeSort = useCallback(() => {
+        const animations = getMergeSortAnimations(array.slice());
+        for (let i = 0; i < animations.length; i++) {
+            const arrayBars = document.getElementsByClassName("bar");
+            const isColorChange = i % 3 !== 2;
+            if (isColorChange) {
+                const [barOneIdx, barTwoIdx] = animations[i];
+                const barOneStyle = arrayBars[barOneIdx].style;
+                const barTwoStyle = arrayBars[barTwoIdx].style;
+                const color = i % 3 === 0 ? SECONDAY_COLOR : PRIMARY_COLOR;
+                setTimeout(() => {
+                    barOneStyle.backgroundColor = color;
+                    barTwoStyle.backgroundColor = color;
+                }, i * SPEED);
+            } else {
+                setTimeout(() => {
+                    const [barOneIdx, newHeight] = animations[i];
+                    const barOneStyle = arrayBars[barOneIdx].style;
+                    barOneStyle.height = `${newHeight}px`;
+                }, i * SPEED);
+            }
+        }
+    }, [array]);
+
+    const bubbleSort = useCallback(() => {
+        const animations = getBubbleSortAnimations(array.slice());
+        let j = 0;
+        for (let i = 0; i < animations.length; i++) {
+            const arrayBars = document.getElementsByClassName("bar");
+            const isColorChange = animations[i].length < 3;
+            if (isColorChange) {
+                const [barOneIdx, barTwoIdx] = animations[i];
+                const barOneStyle = arrayBars[barOneIdx].style;
+                const barTwoStyle = arrayBars[barTwoIdx].style;
+                const color = j % 2 === 0 ? SECONDAY_COLOR : PRIMARY_COLOR;
+                j++;
+                setTimeout(() => {
+                    barOneStyle.backgroundColor = color;
+                    barTwoStyle.backgroundColor = color;
+                }, i * SPEED);
+            } else {
+                setTimeout(() => {
+                    const [barOneIdx, newbarOneHeight, barTwoIdx, newbarTwoHeight] = animations[i];
+                    const barOneStyle = arrayBars[barOneIdx].style;
+                    barOneStyle.height = `${newbarOneHeight}px`;
+
+                    const barTwoStyle = arrayBars[barTwoIdx].style;
+                    barTwoStyle.height = `${newbarTwoHeight}px`;
+                }, i * SPEED);
+            }
+        }
+    }, [array]);
+
+    const quickSort = useCallback(() => {}, []);
+    const heapSort = useCallback(() => {}, []);
+
     useEffect(() => {
         reset && generateRandomArray(length, min, max);
     }, [generateRandomArray, length, max, min, reset]);
 
     useEffect(() => {
         if (sorting) {
-            const newArray = merge(array, 0, array.length - 1);
+            if (algorithm === "bubbleSort") {
+                bubbleSort();
+            } else if (algorithm === "mergeSort") {
+                mergeSort();
+            } else if (algorithm === "quickSort") {
+                quickSort();
+            } else {
+                heapSort();
+            }
             setSorting(false);
-            setArray(newArray);
         }
-    }, [array, setSorting, sorting]);
+    }, [algorithm, array, bubbleSort, heapSort, mergeSort, quickSort, setSorting, sorting]);
 
     return (
         <>

@@ -24,6 +24,7 @@ const algorithms = [
     },
 ];
 
+// todo: disable all items while sorting, replace sort button with stop
 const TopBar = ({
     min,
     setMin,
@@ -78,12 +79,14 @@ const TopBar = ({
                     <label htmlFor="algorithmInput">Algorithm:</label>
                     <select id={"algorithmInput"} value={algorithm} onChange={(e) => setAlgorithm(e.target.value)}>
                         {algorithms.map((alg) => (
-                            <option key={alg.value} value={alg.value}>{alg.label}</option>
+                            <option key={alg.value} value={alg.value}>
+                                {alg.label}
+                            </option>
                         ))}
                     </select>
                 </div>
 
-                <button onClick={() => setSorting(!sorting)}>{sorting ? "Stop" : "Sort"}</button>
+                <button onClick={() => setSorting(!sorting)}>Sort</button>
             </div>
         </>
     );
